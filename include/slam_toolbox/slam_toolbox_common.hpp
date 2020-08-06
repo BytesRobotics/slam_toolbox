@@ -30,7 +30,12 @@
 #include <fstream>
 
 #include "rclcpp/rclcpp.hpp"
-#include "message_filters/subscriber.h"
+#include "lifecycle_msgs/msg/transition.hpp"
+#include "lifecycle_msgs/msg/state.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
+//#include "message_filters/subscriber.h"
+#include "slam_toolbox/subscriber.h"
 #include "tf2_ros/transform_broadcaster.h"
 #include "tf2_ros/transform_listener.h"
 #include "tf2_ros/create_timer_ros.h"
@@ -56,13 +61,28 @@ namespace slam_toolbox
 using namespace ::toolbox_types;  // NOLINT
 using namespace ::karto;  // NOLINT
 
-class SlamToolbox : public rclcpp::Node
+class SlamToolbox : public rclcpp_lifecycle::LifecycleNode
 {
 public:
   explicit SlamToolbox(rclcpp::NodeOptions);
   SlamToolbox();
   ~SlamToolbox();
-  void configure();
+
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_configure(const rclcpp_lifecycle::State &) override;
+
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_activate(const rclcpp_lifecycle::State &) override;
+
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_deactivate(const rclcpp_lifecycle::State &) override;
+
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_cleanup(const rclcpp_lifecycle::State &) override;
+
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_shutdown(const rclcpp_lifecycle::State & state) override;
+
   virtual void loadPoseGraphByParams();
 
 protected:

@@ -24,12 +24,14 @@ namespace map_saver
 {
 
 /*****************************************************************************/
-MapSaver::MapSaver(rclcpp::Node::SharedPtr node, const std::string & map_name)
+MapSaver::MapSaver(rclcpp_lifecycle::LifecycleNode::SharedPtr node, const std::string & map_name)
 : node_(node), map_name_(map_name), received_map_(false)
 /*****************************************************************************/
 {
-  server_ = node_->create_service<slam_toolbox::srv::SaveMap>("save_map",
-      std::bind(&MapSaver::saveMapCallback, this, std::placeholders::_1,
+  server_ = node_->create_service<slam_toolbox::srv::SaveMap>(
+    "save_map",
+    std::bind(
+      &MapSaver::saveMapCallback, this, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3));
 
   auto mapCallback =
@@ -50,7 +52,8 @@ bool MapSaver::saveMapCallback(
 /*****************************************************************************/
 {
   if (!received_map_) {
-    RCLCPP_WARN(node_->get_logger(),
+    RCLCPP_WARN(
+      node_->get_logger(),
       "Map Saver: Cannot save map, no map yet received on topic %s.",
       map_name_.c_str());
     return false;
@@ -58,13 +61,19 @@ bool MapSaver::saveMapCallback(
 
   const std::string name = req->name.data;
   if (name != "") {
-    RCLCPP_INFO(node_->get_logger(),
+    RCLCPP_INFO(
+      node_->get_logger(),
       "SlamToolbox: Saving map as %s.", name.c_str());
-    int rc = system(("ros2 run nav2_map_server map_saver_cli -f " + name  + " --ros-args -p map_subscribe_transient_local:=true").c_str());
+    int rc =
+      system(
+      ("ros2 run nav2_map_server map_saver_cli -f " + name +
+      " --ros-args -p map_subscribe_transient_local:=true").c_str());
   } else {
-    RCLCPP_INFO(node_->get_logger(),
+    RCLCPP_INFO(
+      node_->get_logger(),
       "SlamToolbox: Saving map in current directory.");
-    int rc = system("ros2 run nav2_map_server map_saver_cli --ros-args -p map_subscribe_transient_local:=true");
+    int rc = system(
+      "ros2 run nav2_map_server map_saver_cli --ros-args -p map_subscribe_transient_local:=true");
   }
 
   rclcpp::sleep_for(std::chrono::seconds(1));

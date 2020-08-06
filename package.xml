@@ -24,6 +24,8 @@
   <build_depend>visualization_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
   <build_depend>boost</build_depend>
+  <build_depend>lifecycle_msgs</build_depend>
+  <build_depend>rclcpp_lifecycle</build_depend>
   <!-- <build_depend>interactive_markers</build_depend> -->
   <build_depend>std_msgs</build_depend>
   <build_depend>suitesparse</build_depend>

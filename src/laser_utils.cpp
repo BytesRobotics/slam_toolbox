@@ -70,7 +70,7 @@ void LaserMetadata::invertScan(sensor_msgs::msg::LaserScan & scan) const
 
 
 LaserAssistant::LaserAssistant(
-  rclcpp::Node::SharedPtr node,
+  rclcpp_lifecycle::LifecycleNode::SharedPtr node,
   tf2_ros::Buffer * tf, const std::string & base_frame)
 : node_(node), tf_(tf), base_frame_(base_frame)
 {
@@ -97,8 +97,10 @@ karto::LaserRangeFinder * LaserAssistant::makeLaser(const double & mountingYaw)
   karto::LaserRangeFinder * laser =
     karto::LaserRangeFinder::CreateLaserRangeFinder(
     karto::LaserRangeFinder_Custom, karto::Name("Custom Described Lidar"));
-  laser->SetOffsetPose(karto::Pose2(laser_pose_.transform.translation.x,
-    laser_pose_.transform.translation.y, mountingYaw));
+  laser->SetOffsetPose(
+    karto::Pose2(
+      laser_pose_.transform.translation.x,
+      laser_pose_.transform.translation.y, mountingYaw));
   laser->SetMinimumRange(scan_.range_min);
   laser->SetMaximumRange(scan_.range_max);
   laser->SetMinimumAngle(scan_.angle_min);
@@ -115,7 +117,8 @@ karto::LaserRangeFinder * LaserAssistant::makeLaser(const double & mountingYaw)
   double max_laser_range = 25;
   max_laser_range = node_->declare_parameter("max_laser_range", max_laser_range);
   if (max_laser_range > scan_.range_max) {
-    RCLCPP_WARN(node_->get_logger(),
+    RCLCPP_WARN(
+      node_->get_logger(),
       "maximum laser range setting (%.1f m) exceeds the capabilities "
       "of the used Lidar (%.1f m)", max_laser_range, scan_.range_max);
     max_laser_range = scan_.range_max;
@@ -134,7 +137,8 @@ bool LaserAssistant::isInverted(double & mountingYaw)
   laser_pose_ = tf_->transform(laser_ident, base_frame_);
   mountingYaw = tf2::getYaw(laser_pose_.transform.rotation);
 
-  RCLCPP_DEBUG(node_->get_logger(), "laser %s's pose wrt base: %.3f %.3f %.3f %.3f",
+  RCLCPP_DEBUG(
+    node_->get_logger(), "laser %s's pose wrt base: %.3f %.3f %.3f %.3f",
     frame_.c_str(), laser_pose_.transform.translation.x,
     laser_pose_.transform.translation.y,
     laser_pose_.transform.translation.z, mountingYaw);

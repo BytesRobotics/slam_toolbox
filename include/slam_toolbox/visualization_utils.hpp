@@ -24,11 +24,12 @@
 namespace vis_utils
 {
 
+template<typename NodeType>
 inline visualization_msgs::msg::Marker toMarker(
   const std::string & frame,
   const std::string & ns,
   const double & scale,
-  rclcpp::Node::SharedPtr node)
+  std::shared_ptr<NodeType> node)
 {
   visualization_msgs::msg::Marker marker;
 

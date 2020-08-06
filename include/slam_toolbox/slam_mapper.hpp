@@ -21,6 +21,7 @@
 
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "tf2/utils.h"
 #include "slam_toolbox/toolbox_types.hpp"
 
@@ -44,7 +45,7 @@ public:
   // convert TF pose to karto pose
   karto::Pose2 toKartoPose(const tf2::Transform & pose) const;
 
-  void configure(const rclcpp::Node::SharedPtr & node);
+  void configure(const rclcpp_lifecycle::LifecycleNode::SharedPtr node);
   void Reset();
 
   // // processors

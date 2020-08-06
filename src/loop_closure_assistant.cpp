@@ -28,7 +28,7 @@ namespace loop_closure_assistant
 
 /*****************************************************************************/
 LoopClosureAssistant::LoopClosureAssistant(
-  rclcpp::Node::SharedPtr node,
+  rclcpp_lifecycle::LifecycleNode::SharedPtr node,
   karto::Mapper * mapper,
   laser_utils::ScanHolder * scan_holder,
   PausedState & state, ProcessType & processor_type)
@@ -146,8 +146,9 @@ void LoopClosureAssistant::publishGraph()
   // }
 
   visualization_msgs::msg::MarkerArray marray;
-  visualization_msgs::msg::Marker m = vis_utils::toMarker(map_frame_,
-      "slam_toolbox", 0.1, node_);
+  visualization_msgs::msg::Marker m = vis_utils::toMarker(
+    map_frame_,
+    "slam_toolbox", 0.1, node_);
 
   for (ConstGraphIterator it = graph->begin(); it != graph->end(); ++it) {
     m.id = it->first + 1;
