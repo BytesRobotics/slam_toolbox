@@ -256,7 +256,7 @@ private:
 
     std::string topic_;
     rmw_qos_profile_t qos_;
-  }
+  };
 
 }  // namespace message_filters
 
