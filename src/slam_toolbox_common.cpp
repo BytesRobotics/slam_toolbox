@@ -102,6 +102,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SlamTo
   const rclcpp_lifecycle::State &)
 /*****************************************************************************/
 {
+  RCLCPP_INFO(get_logger(), "Configuring slam toolbox");
   scan_filter_ = std::make_unique<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
     *scan_filter_sub_, *tf_, odom_frame_, 1,
     get_node_logging_interface(), get_node_clock_interface());
@@ -126,9 +127,11 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SlamTo
   const rclcpp_lifecycle::State &)
 /*****************************************************************************/
 {
+  RCLCPP_INFO(get_logger(), "Cleaning up slam toolbox");
   for (int i = 0; i != threads_.size(); i++) {
     threads_[i]->join();
   }
+  RCLCPP_INFO(get_logger(), "Threads joined successfully");
 
   smapper_.reset();
   dataset_.reset();
