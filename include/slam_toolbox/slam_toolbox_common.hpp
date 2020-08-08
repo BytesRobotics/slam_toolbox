@@ -91,7 +91,7 @@ protected:
   void publishTransformLoop(const double & transform_publish_period);
 
   // setup
-  void setParams();
+  void declareParams();
   void setSolver();
   void setROSInterfaces();
 

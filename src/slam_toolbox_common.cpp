@@ -30,6 +30,7 @@ SlamToolbox::SlamToolbox()
 : SlamToolbox(rclcpp::NodeOptions())
 /*****************************************************************************/
 {
+  declareParams();
 }
 
 /*****************************************************************************/
@@ -43,6 +44,7 @@ SlamToolbox::SlamToolbox(rclcpp::NodeOptions options)
   minimum_time_interval_(0.)
 /*****************************************************************************/
 {
+  declareParams();
 }
 
 SlamToolbox::~SlamToolbox()
@@ -62,7 +64,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SlamTo
   smapper_ = std::make_unique<mapper_utils::SMapper>();
   dataset_ = std::make_unique<Dataset>();
 
-  setParams();
+  smapper_->configure(shared_from_this());
   setROSInterfaces();
   setSolver();
 
@@ -81,10 +83,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SlamTo
   reprocessing_transform_.setIdentity();
 
   double transform_publish_period = 0.05;
-  transform_publish_period =
-    this->declare_parameter(
-    "transform_publish_period",
-    transform_publish_period);
+  this->get_parameter("transform_publish_period", transform_publish_period);
   threads_.push_back(
     std::make_unique<boost::thread>(
       boost::bind(
@@ -175,8 +174,7 @@ void SlamToolbox::setSolver()
 {
   // Set solver to be used in loop closure
   std::string solver_plugin = std::string("solver_plugins::CeresSolver");
-  solver_plugin = this->declare_parameter("solver_plugin", solver_plugin);
-
+  this->get_parameter("solver_plugin", solver_plugin);
   try {
     solver_ = solver_loader_.createSharedInstance(solver_plugin);
     RCLCPP_INFO(
@@ -193,7 +191,7 @@ void SlamToolbox::setSolver()
 }
 
 /*****************************************************************************/
-void SlamToolbox::setParams()
+void SlamToolbox::declareParams()
 /*****************************************************************************/
 {
   map_to_odom_.setIdentity();
@@ -237,7 +235,16 @@ void SlamToolbox::setParams()
       RCUTILS_LOG_SEVERITY_DEBUG);
   }
 
-  smapper_->configure(shared_from_this());
+  this->declare_parameter("transform_publish_period", 0.05);
+  this->declare_parameter("tf_buffer_duration", 30.0);
+  this->declare_parameter("map_update_interval", 10.0);
+
+  this->declare_parameter("map_file_name", std::string(""));
+  this->declare_parameter("map_start_pose", std::vector<double>());
+  this->declare_parameter("map_start_at_dock", false);
+
+  this->declare_parameter("solver_plugin", "solver_plugins::CeresSolver");
+
   this->declare_parameter("paused_new_measurements");
   this->set_parameter({"paused_new_measurements", false});
 }
@@ -247,22 +254,26 @@ void SlamToolbox::setROSInterfaces()
 /*****************************************************************************/
 {
   double tmp_val = 30.;
-  tmp_val = this->declare_parameter("tf_buffer_duration", tmp_val);
+  this->get_parameter("tf_buffer_duration", tmp_val);
   tf_ = std::make_unique<tf2_ros::Buffer>(
     this->get_clock(),
     tf2::durationFromSec(tmp_val));
+
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     get_node_base_interface(),
     get_node_timers_interface());
+
   tf_->setCreateTimerInterface(timer_interface);
   tfL_ = std::make_unique<tf2_ros::TransformListener>(*tf_);
   tfB_ = std::make_unique<tf2_ros::TransformBroadcaster>(shared_from_this());
 
   sst_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(
     map_name_, rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
+
   sstm_ = this->create_publisher<nav_msgs::msg::MapMetaData>(
     map_name_ + "_metadata",
     rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
+
   ssMap_ = this->create_service<nav_msgs::srv::GetMap>(
     "dynamic_map",
     std::bind(
@@ -300,7 +311,7 @@ void SlamToolbox::publishTransformLoop(
   }
 
   rclcpp::Rate r(1.0 / transform_publish_period);
-  while (rclcpp::ok()) {
+  while (rclcpp::ok() && this->get_current_state().id() != lifecycle_msgs::msg::State::TRANSITION_STATE_CLEANINGUP) {
     {
       boost::mutex::scoped_lock lock(map_to_odom_mutex_);
       geometry_msgs::msg::TransformStamped msg;
@@ -330,12 +341,10 @@ void SlamToolbox::publishVisualizations()
   og.header.frame_id = map_frame_;
 
   double map_update_interval = 10;
-  map_update_interval = this->declare_parameter(
-    "map_update_interval",
-    map_update_interval);
+  this->get_parameter("map_update_interval", map_update_interval);
   rclcpp::Rate r(1.0 / map_update_interval);
 
-  while (rclcpp::ok()) {
+  while (rclcpp::ok() && this->get_current_state().id() != lifecycle_msgs::msg::State::TRANSITION_STATE_CLEANINGUP) {
     updateMap();
     if (!isPaused(VISUALIZING_GRAPH)) {
       closure_assistant_->publishGraph();
@@ -377,9 +386,6 @@ bool SlamToolbox::shouldStartWithPoseGraph(
 /*****************************************************************************/
 {
   // if given a map to load at run time, do it.
-  this->declare_parameter("map_file_name", std::string(""));
-  this->declare_parameter("map_start_pose", std::vector<double>());
-  this->declare_parameter("map_start_at_dock", false);
   filename = this->get_parameter("map_file_name").as_string();
   if (!filename.empty()) {
     std::vector<double> read_pose;
