@@ -37,7 +37,9 @@ LoopClosureAssistant::LoopClosureAssistant(
   processor_type_(processor_type)
 /*****************************************************************************/
 {
-  node_->declare_parameter("paused_processing", false);
+  if(!node_->has_parameter("paused_processing")){
+    node_->declare_parameter("paused_processing", false);
+  }
   node_->set_parameter(rclcpp::Parameter("paused_processing", false));
   tfB_ = std::make_unique<tf2_ros::TransformBroadcaster>(node_);
   solver_ = mapper_->getScanSolver();

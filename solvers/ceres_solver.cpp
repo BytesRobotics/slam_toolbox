@@ -29,22 +29,24 @@ void CeresSolver::Configure(rclcpp_lifecycle::LifecycleNode::SharedPtr node)
 
   std::string solver_type, preconditioner_type, dogleg_type,
     trust_strategy, loss_fn, mode;
-  solver_type = node->declare_parameter(
-    "ceres_linear_solver",
-    std::string("SPARSE_NORMAL_CHOLESKY"));
-  preconditioner_type = node->declare_parameter(
-    "ceres_preconditioner",
-    std::string("JACOBI"));
-  dogleg_type = node->declare_parameter(
-    "ceres_dogleg_type",
-    std::string("TRADITIONAL_DOGLEG"));
-  trust_strategy = node->declare_parameter(
-    "ceres_trust_strategy",
-    std::string("LM"));
-  loss_fn = node->declare_parameter(
-    "ceres_loss_function",
-    std::string("None"));
-  mode = node->declare_parameter("mode", std::string("mapping"));
+  if(!node_->has_parameter("ceres_linear_solver")) {
+    solver_type = node->declare_parameter(
+      "ceres_linear_solver",
+      std::string("SPARSE_NORMAL_CHOLESKY"));
+    preconditioner_type = node->declare_parameter(
+      "ceres_preconditioner",
+      std::string("JACOBI"));
+    dogleg_type = node->declare_parameter(
+      "ceres_dogleg_type",
+      std::string("TRADITIONAL_DOGLEG"));
+    trust_strategy = node->declare_parameter(
+      "ceres_trust_strategy",
+      std::string("LM"));
+    loss_fn = node->declare_parameter(
+      "ceres_loss_function",
+      std::string("None"));
+    mode = node->declare_parameter("mode", std::string("mapping"));
+  }
   debug_logging_ = node->get_parameter("debug_logging").as_bool();
 
   corrections_.clear();
