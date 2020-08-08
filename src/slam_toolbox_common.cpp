@@ -112,6 +112,10 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SlamTo
     std::bind(
       &SlamToolbox::laserCallback, this,
       std::placeholders::_1));
+  sst_->on_activate();
+  sstm_->on_activate();
+  closure_assistant_->activate();
+
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -120,6 +124,9 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SlamTo
   const rclcpp_lifecycle::State &)
 /*****************************************************************************/
 {
+  sst_->on_deactivate();
+  sstm_->on_deactivate();
+  closure_assistant_->deactivate();
   scan_filter_.reset();
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }

@@ -175,6 +175,20 @@ void LoopClosureAssistant::publishGraph()
   marker_publisher_->publish(marray);
 }
 
+/*****************************************************************************/
+void LoopClosureAssistant::activate()
+/*****************************************************************************/
+{
+  marker_publisher_->on_activate();
+}
+
+/*****************************************************************************/
+void LoopClosureAssistant::deactivate()
+/*****************************************************************************/
+{
+  marker_publisher_->on_deactivate();
+}
+
 // /*****************************************************************************/
 // bool LoopClosureAssistant::manualLoopClosureCallback(
 //   slam_toolbox::LoopClosure::Request & req,

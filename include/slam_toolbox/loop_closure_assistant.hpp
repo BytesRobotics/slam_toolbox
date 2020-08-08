@@ -55,6 +55,8 @@ public:
   // void processInteractiveFeedback(
   //   const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
   void publishGraph();
+  void activate();
+  void deactivate();
 
 private:
   // bool manualLoopClosureCallback(
@@ -69,7 +71,7 @@ private:
 
   std::unique_ptr<tf2_ros::TransformBroadcaster> tfB_;
   laser_utils::ScanHolder * scan_holder_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
+  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<visualization_msgs::msg::MarkerArray>> marker_publisher_;
   // rclcpp::Publisher::SharedPtr<sensor_msgs::msg::LaserScan> scan_publisher_;
   // ros::ServiceServer ssClear_manual_, ssLoopClosure_, ssInteractive_;
   // boost::mutex moved_nodes_mutex_;
