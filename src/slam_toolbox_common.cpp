@@ -94,6 +94,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn SlamTo
     std::make_unique<boost::thread>(
       boost::bind(&SlamToolbox::publishVisualizations, this)));
 
+  loadPoseGraphByParams();
+
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
